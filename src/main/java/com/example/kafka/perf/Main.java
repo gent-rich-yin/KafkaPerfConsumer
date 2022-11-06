@@ -13,6 +13,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 
+import java.text.MessageFormat;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Properties;
@@ -43,7 +44,7 @@ public class Main {
     }
 
     private static void updatePerfMessage(String s, Object... args) {
-        PerfStates.perfMessage = String.format(s, args);
+        PerfStates.perfMessage = MessageFormat.format(s, args);
         logger.info(PerfStates.perfMessage);
     }
 
