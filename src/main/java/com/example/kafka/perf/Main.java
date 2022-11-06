@@ -71,7 +71,7 @@ public class Main {
             int count = 0;
             String currentTopic = null;
             while (true) {
-                if( currentTopic != PerfStates.topic ) {
+                if( currentTopic == null || !currentTopic.equals(PerfStates.topic) ) {
                     if( currentTopic != null && !currentTopic.isBlank() ) {
                         kafkaConsumer.unsubscribe();
                     }
@@ -80,12 +80,13 @@ public class Main {
                     currentTopic = PerfStates.topic;
                     if( currentTopic != null && !currentTopic.isBlank() ) {
                         kafkaConsumer.subscribe(Arrays.asList(PerfStates.topic));
-                        updatePerfMessage("Kafka consumer subscribed to " + PerfStates.topic);
+                        updatePerfMessage("Kafka consumer subscribed to {0}", PerfStates.topic);
                     }
                 }
 
-                if( currentTopic == null && currentTopic.isBlank() ) {
+                if( currentTopic == null || currentTopic.isBlank() ) {
                     try {
+                        updatePerfMessage("Waiting for topic assignment");
                         Thread.sleep(1000);
                         continue;
                     } catch (InterruptedException e) {
