@@ -41,16 +41,7 @@ public class Main {
         properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         this.kafkaConsumer = new KafkaConsumer<>(properties);
-    }
 
-    private static void updatePerfMessage(String s, Object... args) {
-        PerfStates.perfMessage = MessageFormat.format(s, args);
-        logger.info(PerfStates.perfMessage);
-    }
-
-    @EventListener(ApplicationReadyEvent.class)
-    public void startConsuming() {
-        initConsumer();
         final Thread mainThread = Thread.currentThread();
 
         // adding the shutdown hook
@@ -64,15 +55,45 @@ public class Main {
                 e.printStackTrace();
             }
         }));
+    }
 
+    private static void updatePerfMessage(String s, Object... args) {
+        PerfStates.perfMessage = MessageFormat.format(s, args);
+        logger.info(PerfStates.perfMessage);
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void startConsuming() {
+        initConsumer();
         try {
             // subscribe consumer to our topic(s)
-            kafkaConsumer.subscribe(Arrays.asList(PerfStates.topic));
-            updatePerfMessage("Kafka consumer subscribed to " + PerfStates.topic);
             // poll for new data
             long stime = System.currentTimeMillis();
             int count = 0;
+            String currentTopic = null;
             while (true) {
+                if( currentTopic != PerfStates.topic ) {
+                    if( currentTopic != null && !currentTopic.isBlank() ) {
+                        kafkaConsumer.unsubscribe();
+                    }
+                    stime = System.currentTimeMillis();
+                    count = 0;
+                    currentTopic = PerfStates.topic;
+                    if( currentTopic != null && !currentTopic.isBlank() ) {
+                        kafkaConsumer.subscribe(Arrays.asList(PerfStates.topic));
+                        updatePerfMessage("Kafka consumer subscribed to " + PerfStates.topic);
+                    }
+                }
+
+                if( currentTopic == null && currentTopic.isBlank() ) {
+                    try {
+                        Thread.sleep(1000);
+                        continue;
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
                 ConsumerRecords<String, String> records =
                         kafkaConsumer.poll(Duration.ofMillis(100));
                 long ftime = System.currentTimeMillis();
