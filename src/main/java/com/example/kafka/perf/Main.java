@@ -29,7 +29,6 @@ public class Main {
     public int messagesReceivedLastSecond = 0;
 
     public static void main(String[] args) {
-        PerfStates.topic = args[0];
         SpringApplication.run(Main.class, args);
     }
 
