@@ -3,7 +3,7 @@ package com.example.kafka.perf;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin(originPatterns = {"localhost", "http://kafka-perf-test.s3-website-us-east-1.amazonaws.com/"})
+@CrossOrigin(originPatterns = "*")
 public class PerfServices {
     @GetMapping("topic")
     public String getTopic() {
