@@ -81,7 +81,7 @@ public class Main {
                     this.messagesReceivedLastSecond = count;
                     count = 0;
                     stime = ftime;
-                    updatePerfMessage("messagesReceivedLastSecond: {}", this.messagesReceivedLastSecond);
+                    updatePerfMessage("messagesReceivedLastSecond: {0}", this.messagesReceivedLastSecond);
                 }
             }
         } catch (WakeupException e) {
