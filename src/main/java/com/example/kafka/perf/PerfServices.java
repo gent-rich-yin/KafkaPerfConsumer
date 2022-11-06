@@ -16,12 +16,8 @@ public class PerfServices {
     }
 
     @PostMapping("topic")
-    public void setTopic(@RequestBody String topic) {
+    public void setTopic(@RequestBody(required=false) String topic) {
         PerfStates.topic = topic;
     }
 
-    @PostMapping("topic")
-    public void setTopic() {
-        PerfStates.topic = null;
-    }
 }
