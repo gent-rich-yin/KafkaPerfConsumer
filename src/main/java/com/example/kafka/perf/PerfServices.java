@@ -12,11 +12,16 @@ public class PerfServices {
 
     @GetMapping("perfMessage")
     public String getPerfMessage() {
-        return PerfStates.perfMessage;
+        return PerfStates.perfMessage == null ? "" : PerfStates.perfMessage;
     }
 
     @PostMapping("topic")
     public void setTopic(@RequestBody String topic) {
         PerfStates.topic = topic;
+    }
+
+    @PostMapping("topic")
+    public void setTopic() {
+        PerfStates.topic = null;
     }
 }
