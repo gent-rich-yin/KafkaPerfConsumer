@@ -1,7 +1,6 @@
 package com.example.kafka.perf;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.errors.WakeupException;
@@ -14,17 +13,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Properties;
 
 @SpringBootApplication
 public class Main {
     static Logger logger = LoggerFactory.getLogger(Main.class);
 
-    static String topic;
     static String groupId = "KafkaPerfConsumer";
     KafkaConsumer<String, String> kafkaConsumer;
     @Value("${KAFKA.SERVERS}")
@@ -32,7 +28,7 @@ public class Main {
     public int messagesReceivedLastSecond = 0;
 
     public static void main(String[] args) {
-        topic = args[0];
+        PerfStates.topic = args[0];
         SpringApplication.run(Main.class, args);
     }
 
@@ -44,6 +40,11 @@ public class Main {
         properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         this.kafkaConsumer = new KafkaConsumer<>(properties);
+    }
+
+    private static void updatePerfMessage(String s, Object... args) {
+        PerfStates.perfMessage = String.format(s, args);
+        logger.info(PerfStates.perfMessage);
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -65,8 +66,8 @@ public class Main {
 
         try {
             // subscribe consumer to our topic(s)
-            kafkaConsumer.subscribe(Arrays.asList(topic));
-            logger.info("Kafka consumer subscribed to " + topic);
+            kafkaConsumer.subscribe(Arrays.asList(PerfStates.topic));
+            updatePerfMessage("Kafka consumer subscribed to " + PerfStates.topic);
             // poll for new data
             long stime = System.currentTimeMillis();
             int count = 0;
@@ -79,7 +80,7 @@ public class Main {
                     this.messagesReceivedLastSecond = count;
                     count = 0;
                     stime = ftime;
-                    logger.info("messagesReceivedLastSecond: {}", this.messagesReceivedLastSecond);
+                    updatePerfMessage("messagesReceivedLastSecond: {}", this.messagesReceivedLastSecond);
                 }
             }
         } catch (WakeupException e) {
